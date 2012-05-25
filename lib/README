@@ -1,0 +1,176 @@
+
+-----------------------------------------------------------------------------
+-                VSOFont - Very Simple OpenGL (tm) Font                     -
+-           written by ville helin <vhelin#iki.fi> in 2003-2004             -
+-----------------------------------------------------------------------------
+
+this is LGPL software. please read the file LICENSE for further instructions.
+
+
+0. HISTORY
+
+v1.8 (15-May-2004) * added vsofont_read_font_from_memory().
+                   * changed vsofont_read_font() to vsofont_read_font_from_file().
+                   * example shows now how to draw a bolded string.
+                   * VSOFONT header file should now work in C++ projects.
+                   * small optimizations here and there.
+
+v1.7 (28-Jan-2004) * added an antialiased string to the example.
+                   * all color functions need now alpha values as well.
+                   * reduced code bloat a lot.
+                   * small optimizations here and there.
+                   * code cleanups.
+
+v1.6 (03-Dec-2003) * tiny optimizations here and there.
+                   * VSOFONT uses now byte sized indices in fonts
+                     if possible.
+                   * cleaned up the example.
+                   * added more checks and error messages.
+                   * embedded billboard.c into vsofont.c.
+
+v1.5 (15-Nov-2003) * now the example should work with MESA.
+                   * removed debug output from the font reader.
+                   * string writing functions handle the strings
+                     as unsigned char buffers to fix problems when
+                     dealing with letters > \127.
+                   * the font data doesn't have to be left justified to
+                     work best in the proportional font mode.
+                   * optimized drawing a lot, and shrank the integer
+                     sized vertex indices to short.
+
+v1.4 (05-Nov-2003) * added 2D versions of the text writing functions.
+                   * text centering is also done on the vertical axis.
+                   * removed the unused third dimension in the
+                     vertex arrays.
+                   * vsofont_get_string_width() works correctly if
+                     it encounters an undefined character.
+                   * now it's possible to define characters by giving
+                     its number (e.g., \10).
+
+v1.3 (25-Oct-2003) * printing an undefined character equals to
+                     printing a space.
+                   * text writing functions do not enable and
+                     disable OpenGL's states any more.
+                   * the code centering the strings didn't take the
+                     letter spacing into account.
+                   * vsofont_clone() clones also the vertices.
+                   * added support for proportional fonts.
+                   * added vsofont_set_type().
+                   * added an example.
+
+v1.2 (27-sep-2003) * added vsofont_clone().
+                   * vsofont_free() didn't free the vertex buffer.
+
+v1.1 (13-sep-2003) * optimized vsofont_recreate_vertices().
+                   * added "SCALING" and "COLOR" to font file.
+                   * added vsofont_write_string_billboard_centered().
+                   * added vsofont_set_color().
+                   * added vsofont_set_spacing().
+
+v1.0 (06-jul-2003) * the first public release.
+
+
+1. BACKGROUND
+
+at some point in time, when working with handheld devices,
+the font functions GLUT offered proved to be too massive.
+so i decided to write a very simple 3D vector text system
+using OpenGL myself. the code is ANSI C.
+
+
+2. CREATING A NEW FONT
+
+launch your text editor and start typing. ;) here's the
+format of a font file:
+
+..................................................
+
+# some text, perhaps explanations
+
+JUMP!
+
+GRID: <GRID X> x <GRID Y>
+SPACING: <EMPTY SPACE BETWEEN THE CHARACTERS>
+SCALING: <SCALING X> x <SCALING Y>
+COLOR: <R> <G> <B> <A>
+
+<CHARACTER> <LINES, DEFINED USING INDICES TO THE GRID> -1
+...
+
+..................................................
+
+for an example, take a look at the file "example/example.vsofont".
+
+each font has its own grid, and the characters are defined
+with lines on this grid. the result may look a bit blocky,
+but VSOFONT's main purpose is to be fast.
+
+
+3. USING VSOFONT
+
+first of all you need to load a font:
+
+  vsofont_read_font_from_file("example.vsofont", &examplefont);
+
+or parse it from memory (remember to null-terminate the font data):
+
+  vsofont_read_font_from_memory(fontdata, &examplefont);
+
+all fonts are fixed width fonts by default. but if the one we just
+loaded is actually a proportional font, then give:
+
+  vsofont_set_type(examplefont, VSOFONT_TYPE_PROPORTIONAL);
+
+or adjust the scaling of the font:
+
+  vsofont_recreate_vertices(examplefont, 0.1, 0.1);
+
+or draw strings with it. remember that before drawing any strings
+vertex arrays have to be enabled (see the example directory for
+an example of the real usage).
+
+  vsofont_write_string_billboard_centered(examplefont, "Hello World!", 10, 20, 30);
+  vsofont_write_string_billboard(examplefont, "Hello World!", 10, 20, 30);
+  vsofont_write_string_2D_centered(examplefont, "Hello World!", 10, 20);
+  vsofont_write_string_2D(examplefont, "Hello World!", 10, 20);
+
+or change the font's color:
+
+  vsofont_set_color(examplefont, 0.0, 0.5, 1.0, 1.0);
+
+or change the letter spacing:
+
+  vsofont_set_spacing(examplefont, 0.3);
+
+or clone a font. note that you must not free the original font as long as
+any clones of it exist, because clones use the original font's character
+definitions. the meaning of cloned fonts is to have different instances
+of one font, and use e.g., different scaling and color values in the clones
+instead of changing the attributes of one font all the time.
+
+  vsofont_clone(examplefont, &cloneofexamplefont);
+
+at the exit you might want to free the fonts:
+
+  vsofont_free(cloneofexamplefont);
+  vsofont_free(examplefont);
+
+
+4. CONTACT
+
+send me email (vhelin#iki.fi) if you want to submit suggestions,
+bug reports, and cool fonts. ;)
+
+VSOFONT's homepage: http://www.iki.fi/~vhelin/vsofont.html
+
+
+5. THANKS
+
+thanks to kristoffer lawson for a bug report and improved example
+font.
+
+
+6. LEGAL STUFF
+
+VSOFONT is under LGPL. you use VSOFONT at your risk. i take no
+responsibility for anything.
